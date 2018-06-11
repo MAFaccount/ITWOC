@@ -1,5 +1,5 @@
 {
-    "name": "maf/itwoc",
+    "name": "istanbouly/itwoc",
     "description": "this is package to connect with i2c services",
     "type": "library",
     "license": "MIT",
