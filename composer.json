@@ -1,0 +1,31 @@
+{
+    "name": "maf/itwoc",
+    "description": "this is package to connect with i2c services",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mohammad Istanbouly",
+            "email": "mohammad.istanbouly@maf.co.ae"
+        }
+    ],
+    "require": {
+        "illuminate/support": ">=5.0.0",
+        "monolog/monolog": "^1.23"
+    },
+    "autoload" : {
+        "psr-4" : {
+            "ITWOC\\" : "src/ITWOC"
+        }
+    },
+     "extra": {
+        "laravel": {
+            "providers": [
+                "ITWOC\\Providers\\ITWOCServiceProvider"
+            ],
+            "aliases": {
+                "ITWOC": "ITWOC\\Facades\\ITWOC"
+            }
+        }
+    }
+}
