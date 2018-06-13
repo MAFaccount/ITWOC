@@ -18,19 +18,19 @@ trait ITWOCValidatorTrait {
      * $_addCardAction shows the correct structure for AddCard Service Array
      * @var Array
      */
-	protected $_addCardAction = [
-		'CardAcceptor' => ['Id' => ''],
-		'Card' => ['StartingNumbers' => ''],
-		'Profile' => [
-				[
-					'FirstName' => '',
-					'LastName' => '',
-					'Email' => '',
-					'CellNumber' => ''
-				],
-			'ApplyFee' => '',
-			]
-	];
+    protected $_addCardAction = [
+        'CardAcceptor' => ['Id' => ''],
+        'Card' => ['StartingNumbers' => ''],
+        'Profile' => [
+                [
+                    'FirstName' => '',
+                    'LastName' => '',
+                    'Email' => '',
+                    'CellNumber' => ''
+                ],
+            'ApplyFee' => '',
+            ]
+    ];
 
     /**
      * $_loadCardAction show the correct structure for LoadCard Service Array
@@ -55,15 +55,26 @@ trait ITWOCValidatorTrait {
     ];
 
     /**
+     * $_debitCardAction show the correct structure for DebitFunds Service Array
+     * @var Array
+     */
+    protected $_debitCardAction = [
+        'CardAcceptor' => ['Id' => '' ],
+        'Card' => [ 'ReferenceID' => ''],
+        'ApplyFee' => '',
+        'Amount' => ''
+    ];
+
+    /**
      * validateAddCardAction accepts the array to be validated fot AddCard Service
      * it will pass the array it recieved along with it's correct structure that
      * it should implement to the followsFormat function
      * @param  Array  $data [array for AddCard Service]
      * @return Bool       [whether it follows the format or not]
      */
-	protected function validateAddCardAction(array $data = [])  {
-		return $this->followsFormat($data , $this->_addCardAction);
-	}
+    protected function validateAddCardAction(array $data = []) : bool {
+        return $this->followsFormat($data , $this->_addCardAction);
+    }
 
     /**
      * validateLoadCardAction accepts the array to be validated fot LoadCard Service
@@ -72,7 +83,7 @@ trait ITWOCValidatorTrait {
      * @param  Array  $data [array for LoadCard Service]
      * @return Bool       [whether it follows the format or not]
      */
-    protected function validateLoadCardAction(array $data = []){
+    protected function validateLoadCardAction(array $data = []) : bool {
         return $this->followsFormat($data , $this->_loadCardAction);
     }
 
@@ -84,8 +95,21 @@ trait ITWOCValidatorTrait {
      * @param  Array  $data [array for CheckBalance Service]
      * @return Bool       [whether it follows the format or not]
      */
-    protected function validateCheckBalanceAction(array $data = []){
+    protected function validateCheckBalanceAction(array $data = []) : bool {
         return $this->followsFormat($data , $this->_checkBalanceAction);
+    }
+
+
+
+    /**
+     * validateDebitCardAction accepts the array to be validated fot DebitFunds Service
+     * it will pass the array it recieved along with it's correct structure that
+     * it should implement to the followsFormat function
+     * @param  Array  $data [array for DebitFunds Service]
+     * @return Bool       [whether it follows the format or not]
+     */
+    protected function validateDebitCardAction(array $data = []) : bool {
+        return $this->followsFormat($data , $this->_debitCardAction);
     }
 
 
@@ -95,23 +119,23 @@ trait ITWOCValidatorTrait {
      * @param  [Array] $format [array of predefined data structure for a particular service  ]
      * @return [Bool]         [whether the match or not based on there keys matching recursively]
      */
-	protected function followsFormat($data , $format){
-		if(array_keys($data) != array_keys($format))
-			return false;
+    protected function followsFormat($data , $format) : bool {
+        if(array_keys($data) != array_keys($format))
+            return false;
 
-			// print_r($data);
-			// echo "<hr>";
-			// print_r($format);
+            // print_r($data);
+            // echo "<hr>";
+            // print_r($format);
 
-		foreach ($data as $key => $value) {
-			if(is_array($value)){
-				$bool = $this->followsFormat($value , $format[$key]);
+        foreach ($data as $key => $value) {
+            if(is_array($value)){
+                $bool = $this->followsFormat($value , $format[$key]);
 
-				if(!$bool)
-					return $bool;
-			}
-		}
+                if(!$bool)
+                    return $bool;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 }

@@ -10,6 +10,8 @@ return [
 		'EnUserID' => env('I2C_EN_USER_ID'),
 		'EnPwd' => env('I2C_EN_PWD'),
 	],
-]
+],
+
+'allowed_starting_numbers' => env('I2C_ALLOWED_STARTING_NUMBERS')
 
 ];
