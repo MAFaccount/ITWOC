@@ -236,11 +236,8 @@ class ITWOC {
         }
     }
 
-
-
-
     /**
-     * withdraw this function will withdraw money in the card
+     * withdraw this function will load money in the card
      * @param  Array  $data [card details]
      * @return [array]      will return response
      */
@@ -285,10 +282,47 @@ class ITWOC {
         }
     }
 
+    public function activateCard(array $data = []) : array{
+        if($this->validateActivateCardAction($data)){
+            $acquirer = $this->getAcquirer();
+            $data = $acquirer + $data;
+
+            try{
+                $this->logInfo(json_encode($data));
+                $res = $this->_client->__Call("activateCard" , [$data]);
 
 
+                //check for success
+                if($res->ResponseCode == 'I2C00'){
+                    $response = [
+                        'code' => 200,
+                        'data' => $res,
+                        'message' => ''
+                    ];
+                }else{
+                    $response = [
+                        'code' => 422,
+                        'data' => $res,
+                        'message' => 'Validation Error'
+                    ];
+                }
 
+                $this->logInfo(json_encode($response));
 
+                $response['ARN'] = $acquirer['Acquirer']['ARN'];
+                return $response;
+
+            }catch(\SoapException $e){
+                $response = [
+                    'code' => $e->getCode() ,
+                    'message' => $e->getMessage(),
+                ];
+
+                $this->logError(json_encode($response));
+                return $response;
+            }
+        }
+    }
 
     //logging functions
 

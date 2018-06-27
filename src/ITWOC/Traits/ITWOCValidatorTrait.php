@@ -15,7 +15,7 @@ trait ITWOCValidatorTrait {
 
 
     /**
-     * $_addCardAction shows the correct structure for AddCard Service Array
+     * $_addCardAction shows the correct structure for AddCard Service
      * @var Array
      */
     protected $_addCardAction = [
@@ -33,7 +33,7 @@ trait ITWOCValidatorTrait {
     ];
 
     /**
-     * $_loadCardAction show the correct structure for LoadCard Service Array
+     * $_loadCardAction show the correct structure for LoadCard Service
      * @var Array
      */
     protected $_loadCardAction = [
@@ -45,7 +45,7 @@ trait ITWOCValidatorTrait {
     ];
 
     /**
-     * $_checkBalanceAction show the correct structure for CheckBalance Service Array
+     * $_checkBalanceAction show the correct structure for CheckBalance Service
      * @var Array
      */
     protected $_checkBalanceAction = [
@@ -55,7 +55,7 @@ trait ITWOCValidatorTrait {
     ];
 
     /**
-     * $_debitCardAction show the correct structure for DebitFunds Service Array
+     * $_debitCardAction show the correct structure for DebitFunds Service
      * @var Array
      */
     protected $_debitCardAction = [
@@ -64,6 +64,16 @@ trait ITWOCValidatorTrait {
         'ApplyFee' => '',
         'Amount' => ''
     ];
+
+    /**
+     * $_activateCardAction show the correct structure for activateCard Service
+     * @var Array
+     */
+    protected $_activateCardAction = [
+        'CardAcceptor' => ['LocalDateTime' => '' ],
+        'Card' => [ 'ReferenceID' => ''],
+    ];
+
 
     /**
      * validateAddCardAction accepts the array to be validated fot AddCard Service
@@ -110,6 +120,18 @@ trait ITWOCValidatorTrait {
      */
     protected function validateDebitCardAction(array $data = []) : bool {
         return $this->followsFormat($data , $this->_debitCardAction);
+    }
+
+
+    /**
+     * validateDebitCardAction accepts the array to be validated fot DebitFunds Service
+     * it will pass the array it recieved along with it's correct structure that
+     * it should implement to the followsFormat function
+     * @param  Array  $data [array for DebitFunds Service]
+     * @return Bool       [whether it follows the format or not]
+     */
+    protected function validateActivateCardAction(array $data = []) : bool {
+        return $this->followsFormat($data , $this->_activateCardAction);
     }
 
 
