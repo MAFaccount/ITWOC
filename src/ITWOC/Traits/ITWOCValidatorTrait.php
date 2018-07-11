@@ -59,10 +59,10 @@ trait ITWOCValidatorTrait {
      * @var Array
      */
     protected $_debitCardAction = [
-        'CardAcceptor' => ['Id' => '' ],
-        'Card' => [ 'ReferenceID' => ''],
-        'ApplyFee' => '',
-        'Amount' => ''
+        'CardNo' => '',
+        'ExpiryDate' => '',
+        'Amount' => '',
+        'TxnReferenceId' => ''
     ];
 
     /**
