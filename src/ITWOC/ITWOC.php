@@ -63,6 +63,7 @@ class ITWOC {
     protected $_allowedStartingNumbers = [];
 
 
+
     /**
      * __construct will initialize the package important data and setup some helpers like Logger & SoapClient
      */
@@ -79,7 +80,7 @@ class ITWOC {
         $this->_wsdlUrl = config('itwoc.wsdl_file');
         $this->_acquirer = config('itwoc.acquirer');
         $this->_logPath = config('itwoc.log_path');
-        
+
         //register the soapclient
         $this->_client = new SoapClient( $this->_wsdlUrl ,array("trace" => 1, "exception" => 0));
     }
@@ -91,7 +92,7 @@ class ITWOC {
         //load data from configuration file
         $this->_najm_wsdlUrl = config('itwoc.najm_wsdl_file');
         $this->_najm_logPath = config('itwoc.najm_log_path');
-       
+
         //register the soapclient
         $this->_najm_client = new SoapClient( $this->_najm_wsdlUrl ,array("trace" => 1, "exception" => 0));
     }
@@ -214,15 +215,27 @@ class ITWOC {
      * @param  Array  $data [card details]
      * @return [Array]       will return response
      */
-    public function checkBalance(array $data = []) : array {
-        if($this->validateCheckBalanceAction($data)){
+    public function checkBalance(array $data = [] , $cvv = '') : array {
+        if($this->validateCheckBalanceAction($data) && !empty($cvv)){
             $acquirer = $this->getAcquirer();
             $data = $acquirer + $data;
+
+
+            //decide if it is a virtual card or not
+            $data['Card']['CardBin'] = substr($data['Card']['Number'], 0 , 7);
+
+            $firstEightDigits = substr($data['Card']['Number'] , 0 , 8);
+
+            $virtualNumbers = config('itwoc.virtual_allowed_starting_numbers');
+
+            if($firstEightDigits == $virtualNumbers)
+                $data['Card']['AAC'] = $cvv;
+            else
+                $data['Card']['PIN'] = $cvv;
 
             try{
                 $this->logInfo(json_encode($data));
                 $res = $this->_client->__Call("balanceInquiry" , [$data]);
-
 
                 //check for success
                 if($res->ResponseCode == 'I2C00'){
@@ -263,44 +276,44 @@ class ITWOC {
      */
     public function withdraw(array $data = []) : array {
         if($this->validateDebitCardAction($data)){
-            
+
 
             try{
-            	$this->initLog($this->_najm_logPath,'NAJM');
-            	$dataLogObject = new ArrayObject($data);
-				$dataLogObject['CardNo'] = "************".substr($data['CardNo'], -4);
-				$dataLogObject['ExpiryDate'] = '****';
-            	$dataLog = $dataLogObject->getArrayCopy(); 
-            	$this->logInfo(json_encode($dataLog));
+                $this->initLog($this->_najm_logPath,'NAJM');
+                $dataLogObject = new ArrayObject($data);
+                $dataLogObject['CardNo'] = "************".substr($data['CardNo'], -4);
+                $dataLogObject['ExpiryDate'] = '****';
+                $dataLog = $dataLogObject->getArrayCopy();
+                $this->logInfo(json_encode($dataLog));
                 $input = array(
-						'header' => array(
-							'version' => config('itwoc.najm_version'),
-							'msg_id' => $data['TxnReferenceId'],
-							'msg_type' => config('itwoc.najm_msg_type'),
-							'msg_function' => config('itwoc.najm_msg_function'),
-							'src_application' => config('itwoc.najm_src_application'),
-							'target_application' => config('itwoc.najm_target_application'),
-							'timestamp' => $time,
-							'tracking_id' => $data['TxnReferenceId'],
-							'bank_id' => config('itwoc.najm_bank_id'),
-						),
-						'body' => array(
-							'card_no' => $data['CardNo'],
-							'expiry_date' => $data['ExpiryDate'],
-							'channel_name' => config('itwoc.najm_channel_name'),
-							'txn_reference_id' => $data['TxnReferenceId'],
-							'transaction_amount' => $data['Amount'],
-							'merchant_id' => config('itwoc.najm_merchant_id'),
-							'terminal_id' => config('itwoc.najm_terminal_id')
-						)
-					);
+                        'header' => array(
+                            'version' => config('itwoc.najm_version'),
+                            'msg_id' => $data['TxnReferenceId'],
+                            'msg_type' => config('itwoc.najm_msg_type'),
+                            'msg_function' => config('itwoc.najm_msg_function'),
+                            'src_application' => config('itwoc.najm_src_application'),
+                            'target_application' => config('itwoc.najm_target_application'),
+                            'timestamp' => $time,
+                            'tracking_id' => $data['TxnReferenceId'],
+                            'bank_id' => config('itwoc.najm_bank_id'),
+                        ),
+                        'body' => array(
+                            'card_no' => $data['CardNo'],
+                            'expiry_date' => $data['ExpiryDate'],
+                            'channel_name' => config('itwoc.najm_channel_name'),
+                            'txn_reference_id' => $data['TxnReferenceId'],
+                            'transaction_amount' => $data['Amount'],
+                            'merchant_id' => config('itwoc.najm_merchant_id'),
+                            'terminal_id' => config('itwoc.najm_terminal_id')
+                        )
+                    );
 
                 $res = $this->_najm_client->__Call("CARD_DEBIT" , [$input]);
                 $reportRespCode = $res->exception_details->error_code;
-				$reportRespMessage = $res->exception_details->error_description;
-				$referenceNumber = $res->exception_details->transaction_ref_id;
+                $reportRespMessage = $res->exception_details->error_description;
+                $referenceNumber = $res->exception_details->transaction_ref_id;
                 $statusResponse = $res->exception_details->status;
-			    //check for success
+                //check for success
                 if(strtolower($statusResponse) == 's' && strtolower($reportRespMessage) == 'success' && $reportRespCode == 000){
                     $response = [
                         'code' => 200,
@@ -373,11 +386,11 @@ class ITWOC {
 
     //logging functions
     public function initLog($logPath = '',$logChanel = 'ITWOC'){
-    	if($logPath != ''){
-    		$this->_logPath = $logPath; 
-    	}
-    	$this->_logger = new Logger($logChanel);
-    	// the default date format is "Y-m-d H:i:s"
+        if($logPath != ''){
+            $this->_logPath = $logPath;
+        }
+        $this->_logger = new Logger($logChanel);
+        // the default date format is "Y-m-d H:i:s"
         $dateFormat = "Y n j, g:i a";
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
@@ -391,27 +404,27 @@ class ITWOC {
      * @param  string           $info           Info message to log in the log files
      */
     public function logInfo($info = ''){
-    	$this->_logger->info($info);
+        $this->_logger->info($info);
     }
 
     /**
      * @param  string           $notice         Notice message to log in the log files
      */
     public function logNotice($notice = ''){
-    	$this->_logger->notice($notice);
+        $this->_logger->notice($notice);
     }
 
     /**
      * @param  string           $error          Error message to log in the log files
      */
     public function logError($error = ''){
-    	$this->_logger->error($error);
+        $this->_logger->error($error);
     }
 
     /**
      * @param  string           $warning            Warning message to log in log files
      */
     public function logWarning($warning = ''){
-    	$this->_logger->warning($warning);
+        $this->_logger->warning($warning);
     }
 }
