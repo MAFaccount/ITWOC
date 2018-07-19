@@ -79,6 +79,7 @@ class ITWOC {
         $this->_wsdlUrl = config('itwoc.wsdl_file');
         $this->_acquirer = config('itwoc.acquirer');
         $this->_logPath = config('itwoc.log_path');
+        $this->_allowedStartingNumbers = explode(',' , config('itwoc.allowed_starting_numbers'));
         
         //register the soapclient
         $this->_client = new SoapClient( $this->_wsdlUrl ,array("trace" => 1, "exception" => 0));
@@ -270,7 +271,7 @@ class ITWOC {
             	$dataLogObject = new ArrayObject($data);
 				$dataLogObject['CardNo'] = "************".substr($data['CardNo'], -4);
 				$dataLogObject['ExpiryDate'] = '****';
-            	$dataLog = $dataLogObject->getArrayCopy(); 
+            	$dataLogObject = new \ArrayObject($data);
             	$this->logInfo(json_encode($dataLog));
                 $input = array(
 						'header' => array(
@@ -327,6 +328,12 @@ class ITWOC {
                 return $response;
             }
         }
+        $response = [
+            'code' => 422,
+            'message' => 'Validation error check your array structure and starting number may not be allowed'
+        ];
+        
+        return $response;
     }
 
     public function activateCard(array $data = []) : array{
