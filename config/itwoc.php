@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 return [
 
@@ -28,6 +28,8 @@ return [
 
 ],
 
-'allowed_starting_numbers' => env('I2C_ALLOWED_STARTING_NUMBERS')
+'allowed_starting_numbers' => env('I2C_ALLOWED_STARTING_NUMBERS'),
+
+'virtual_allowed_starting_numbers' => env('I2C_VIRTUAL_ALLOWED_STARTING_NUMBERS'),
 
 ];

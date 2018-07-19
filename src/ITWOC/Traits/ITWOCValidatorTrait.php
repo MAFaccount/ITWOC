@@ -50,7 +50,7 @@ trait ITWOCValidatorTrait {
      */
     protected $_checkBalanceAction = [
         'CardAcceptor' => ['Id' => '' ],
-        'Card' => [ 'ReferenceID' => ''],
+        'Card' => [ 'Number' => ''],
         'ApplyFee' => '',
     ];
 
